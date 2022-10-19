@@ -50,9 +50,8 @@ def _calculate_performance_credits(perf, play):
     return credits.add(_calculate_extra_credits_for_comedy(play, perf))
 
 def _calculate_extra_credits_for_comedy(play, perf):
-    if "comedy" == play["type"]:
-        return Credits(math.floor(perf['audience'] / 5))
-    return Credits(0)
+    comedy_extra_credits = math.floor(perf['audience'] / 5)
+    return Credits(comedy_extra_credits) if 'comedy' == play["type"] else Credits(0)
 
 def _calculate_performance_amount(play, perf):
     if not play['type'] in ['tragedy', 'comedy']:
@@ -72,14 +71,12 @@ def _calculate_amount_for_tragedy_play(perf):
         .add(_calculate_extra_amount_for_tragedy_high_audience(perf))
 
 def _calculate_extra_amount_for_comedy_high_audience(perf):
-    if perf['audience'] > 20:
-        return Amount(10000 + 500 * (perf['audience'] - 20))
-    return Amount(0)
+    extra_amount = 10000 + 500 * (perf['audience'] - 20)
+    return Amount(extra_amount) if perf['audience'] > 20 else Amount(0)
 
 def _calculate_extra_amount_for_tragedy_high_audience(perf):
-    if perf['audience'] > 30:
-        return Amount(1000 * (perf['audience'] - 30))
-    return Amount(0)
+    extra_amount = 1000 * (perf['audience'] - 30)
+    return Amount(extra_amount) if perf['audience'] > 30 else Amount(0)
 
 def _format_as_dollars(amount):
     return f"${amount:0,.2f}"
