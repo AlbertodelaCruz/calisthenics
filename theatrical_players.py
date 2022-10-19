@@ -23,24 +23,35 @@ class Credits:
         new_credits = self._credits + other.current()
         return Credits(new_credits)
 
+@dataclass
+class TextOutput:
+    _text: str
+
+    def print(self):
+        return self._text
+
+    def add(self, other):
+        new_text = self._text + other.print()
+        return TextOutput(new_text)
+
 
 def statement(invoice, plays):
     amount = Amount(0)
     credits = Credits(0)
-    result = f'Statement for {invoice["customer"]}\n'
+    result = TextOutput(f'Statement for {invoice["customer"]}\n')
 
     for perf in invoice['performances']:
         credits, result, amount = _calculate_perfomance_result(plays, perf, credits, result, amount)
 
-    result += f'Amount owed is {_format_as_dollars(amount.current()/100)}\nYou earned {credits.current()} credits\n'
-    return result
+    return result.add(TextOutput(f'Amount owed is {_format_as_dollars(amount.current()/100)}\nYou earned {credits.current()} credits\n')).print()
 
 def _calculate_perfomance_result(plays, perf, credits, result, amount):
     play = plays[perf['playID']]
     performance_amount = _calculate_performance_amount(play, perf)
     performance_credits = _calculate_performance_credits(perf, play)
+    performance_text = TextOutput(f' {play["name"]}: {_format_as_dollars(performance_amount.current()/100)} ({perf["audience"]} seats)\n')
 
-    result += f' {play["name"]}: {_format_as_dollars(performance_amount.current()/100)} ({perf["audience"]} seats)\n'
+    result = result.add(performance_text)
     amount = amount.add(performance_amount)
     credits = credits.add(performance_credits)
     return credits, result, amount
