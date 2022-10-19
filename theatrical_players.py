@@ -14,25 +14,25 @@ class Amount:
 
 
 def statement(invoice, plays):
-    total_amount = Amount(0)
+    amount = Amount(0)
     total_credits = 0
     result = f'Statement for {invoice["customer"]}\n'
 
     for perf in invoice['performances']:
-        total_credits, result, total_amount = _calculate_perfomance_result(plays, perf, total_credits, result, total_amount)
+        total_credits, result, amount = _calculate_perfomance_result(plays, perf, total_credits, result, amount)
 
-    result += f'Amount owed is {_format_as_dollars(total_amount.current()/100)}\nYou earned {total_credits} credits\n'
+    result += f'Amount owed is {_format_as_dollars(amount.current()/100)}\nYou earned {total_credits} credits\n'
     return result
 
-def _calculate_perfomance_result(plays, perf, total_credits, result, total_amount):
+def _calculate_perfomance_result(plays, perf, total_credits, result, amount):
     play = plays[perf['playID']]
-    this_amount = _calculate_performance_amount(play, perf)
+    performance_amount = _calculate_performance_amount(play, perf)
     performance_credits = _calculate_performance_credits(perf, play)
 
-    result += f' {play["name"]}: {_format_as_dollars(this_amount.current()/100)} ({perf["audience"]} seats)\n'
-    total_amount = total_amount.add(this_amount)
+    result += f' {play["name"]}: {_format_as_dollars(performance_amount.current()/100)} ({perf["audience"]} seats)\n'
+    amount = amount.add(performance_amount)
     total_credits += performance_credits
-    return total_credits, result, total_amount
+    return total_credits, result, amount
 
 def _calculate_performance_credits(perf, play):
     volume_credits = max(perf['audience'] - 30, 0)
@@ -48,10 +48,10 @@ def _calculate_performance_amount(play, perf):
     if not play['type'] in ['tragedy', 'comedy']:
         raise ValueError(f'unknown type: {play["type"]}')
     if play['type'] == "tragedy":
-        this_amount = _calculate_amount_for_tragedy_play(perf)
+        performance_amount = _calculate_amount_for_tragedy_play(perf)
     if play['type'] == "comedy":
-        this_amount = _calculate_amount_for_comedy_play(perf)
-    return this_amount
+        performance_amount = _calculate_amount_for_comedy_play(perf)
+    return performance_amount
 
 def _calculate_amount_for_comedy_play(perf):
     return Amount(30000)\
